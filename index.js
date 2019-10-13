@@ -1,54 +1,124 @@
 class Select {
   constructor({ selector, label, url, onSelect }) {
-    this.selector = selector;
-    this.label = label;
-    this.url = url;
-    this.onSelect = onSelect;
+    this.selector = document.querySelector(selector)
+    this.label = label
+    this.url = url
+    this.onSelect = onSelect
+    this.dropdown = null
+    this.labelItem = null
+    this.options = null
+  }
+
+  addListeners() {
+    document.addEventListener('click', (e) => {
+      if (this.dropdown.classList.contains('is-open')) {
+        this.dropdown.classList.remove('is-open')
+      } else {
+        this.dropdown.classList.add('is-open')
+      }
+
+      if (e.target.closest('#select')) return
+      this.dropdown.classList.remove('is-open')
+    })
+  }
+
+  addDropdown() {
+    this.dropdown = document.createElement('div')
+    this.dropdown.classList.add('g-dropdown')
+  }
+
+  async getOptions() {
+    try {
+      return await fetch(this.url).then((data) => data.json());
+    } catch (e) {
+      throw e
+    }
+  }
+
+  removeActive() {
+    this.optionsItem.forEach((option) => option.classList.remove('is-active'))
+  }
+
+  async setOptions() {
+    this.options = await this.getOptions();
+    const optionsItem = [];
+
+    for (let [key, {label}] of Object.entries(this.options)) {
+      const option = document.createElement('div')
+      option.classList.add('g-option')
+      option.innerHTML = label
+      option.id = key
+      optionsItem.push(option)
+      option.addEventListener('click', (e) => {
+        this.labelItem.innerHTML = option.innerHTML
+        this.labelItem.id = option.id
+        this.removeActive()
+        option.classList.add('is-active')
+      })
+
+      this.dropdown.append(option)
+    }
+    this.optionsItem = optionsItem
   }
 
   initSelect() {
-    const s = document.createElement('div');
-    s.className = "g-select";
-    const container = document.querySelector(this.selector);
-    const dropdown = document.createElement('div');
-    const carret = document.createElement('div');
-    dropdown.classList.add('g-dropdown');
-    carret.classList.add('g-carret');
-    const option = document.createElement('div');
-    const option1 = document.createElement('div');
-    const option2 = document.createElement('div');
-    const option3 = document.createElement('div');
-    option.innerHTML = 'first';
-    option.classList.add('g-option');
-    option1.innerHTML = 'second';
-    option1.classList.add('g-option');
-    option2.innerHTML = 'third';
-    option2.classList.add('g-option');
-    option3.innerHTML = 'fourth';
-    option3.classList.add('g-option');
-    dropdown.append(option);
-    dropdown.append(option1);
-    dropdown.append(option2);
-    dropdown.append(option3);
-    s.append(carret);
-    s.append(dropdown);
-    container.append(s);
-    console.log(s);
-    console.log(option);
-  }
+    const s = document.createElement('div')
+    s.className = "g-select"
+    const carret = document.createElement('div')
+    this.labelItem = document.createElement('div')
 
-  destroy() {
-    const container = document.querySelector(this.selector);
-    container.remove();
-    console.log('destroy');
+    this.labelItem.classList.add('g-label')
+    this.labelItem.innerHTML = this.label
+
+    carret.classList.add('g-carret')
+    s.append(carret)
+    s.append(this.labelItem)
+
+    this.addDropdown()
+    this.setOptions()
+    s.append(this.dropdown)
+    this.selector.append(s)
+
+    this.addListeners()
   }
 
   open() {
-    console.log('open')
+    this.dropdown.classList.add('is-open')
   }
 
   close() {
-    console.log('close')
+    this.dropdown.classList.remove('is-open')
+  }
+
+  set() {
+    this.optionsItem.forEach((option, index) => {
+      if (index === 5) {
+        this.labelItem.innerHTML = option.innerHTML
+        this.labelItem.id = option.id
+        this.removeActive()
+        option.classList.add('is-active')
+      }
+    })
+  }
+
+  get() {
+    const {innerHTML, id} = this.labelItem
+    if (!id) {
+      alert('Empty label value')
+    } else {
+      alert(JSON.stringify({id, value: innerHTML}))
+    }
+  }
+
+  clear() {
+    if (!this.labelItem.hasAttribute('id')) return
+    this.labelItem.innerHTML = this.label
+    this.labelItem.removeAttribute('id')
+    this.removeActive()
+  }
+
+  destroy() {
+    this.selector.remove()
   }
 }
 
@@ -60,13 +130,36 @@ const select = new Select({
 })
 
 const init = () => {
-  select.initSelect();
-  const actions = document.getElementById('actions');
-  console.log(actions);
+  select.initSelect()
+  const actions = document.querySelectorAll('#actions button')
+
+  actions.forEach((elem) => {
+    elem.addEventListener('click', (e) => {
+      e.stopPropagation()
+      const {type} = e.target.dataset
+
+      switch (type) {
+        case 'open':
+          select.open()
+          break
+        case 'close':
+          select.close()
+          break
+        case 'set':
+          select.set()
+          break
+        case 'get':
+          select.get()
+          break
+        case 'clear':
+          select.clear()
+          break
+        case 'destroy':
+          select.destroy()
+          break
+      }
+    })
+  })
 }
 
-init();
-
-// setTimeout(() => {
-//   select.destroy();
-// }, 2000);
+init()

@@ -9,6 +9,7 @@
   height: 100vh;
   display: flex;
   justify-content: space-around;
+  align-items: flex-start;
   padding-top: 5rem;
   margin: 0 auto;
   max-width: 800px;
@@ -35,6 +36,7 @@
   border: 1px solid black;
   height: 50px;
   position: relative;
+  cursor: pointer;
 }
 
 .g-dropdown {
@@ -43,6 +45,13 @@
   left: 0;
   top: 100%;
   border: 1px solid green;
+  height: 105px;
+  overflow: auto;
+  display: none;
+}
+
+.g-dropdown.is-open {
+  display: block;
 }
 
 .g-carret {
@@ -51,4 +60,30 @@
   width: 50px;
   height: 50px;
   border: 1px solid red;
+}
+
+.g-label {
+  width: 100%;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+}
+
+.g-option {
+  padding: 3px 10px;
+  border-bottom: 1px solid #000;
+  cursor: pointer;
+}
+.g-option.is-active {
+  background-color: #333;
+  color: white;
+}
+
+/* .g-option:hover {
+
+} */
+
+.g-option:last-child {
+  border-bottom: none;
 }
